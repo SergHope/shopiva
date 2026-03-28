@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 
 export default function Header() {
   const [user, setUser] = useState<any>(null);
+  const pathname = usePathname();
 
- useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
     fetch('http://127.0.0.1:8000/api/users/me/', {
@@ -20,8 +22,8 @@ export default function Header() {
         return res.json();
       })
       .then(data => { if (data) setUser(data); });
-  }, []);
-  
+  }, [pathname]);
+
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -40,7 +42,9 @@ export default function Header() {
         <div className="flex items-center gap-4 text-sm text-gray-600">
           {user ? (
             <>
-              <a href="/dashboard" className="hover:text-indigo-600 font-medium">👤 {user.username}</a>
+              <a href={user.role === 'admin' ? '/admin-panel' : user.role === 'seller' ? '/vendor' : '/dashboard'} className="hover:text-indigo-600 font-medium">
+                👤 {user.username}
+              </a>
               <button onClick={handleLogout} className="hover:text-red-500">Çıkış</button>
             </>
           ) : (

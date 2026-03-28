@@ -70,3 +70,27 @@ class MyOrdersView(APIView):
         orders = Order.objects.filter(user=request.user).order_by('-created_at')
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)
+
+class AllOrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.role not in ['admin', 'seller']:
+            return Response({'error': 'Yetkisiz erişim!'}, status=403)
+        orders = Order.objects.all().order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
+
+class UpdateOrderStatusView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        if request.user.role not in ['admin', 'seller']:
+            return Response({'error': 'Yetkisiz erişim!'}, status=403)
+        try:
+            order = Order.objects.get(id=pk)
+        except Order.DoesNotExist:
+            return Response({'error': 'Sipariş bulunamadı!'}, status=404)
+        order.status = request.data.get('status', order.status)
+        order.save()
+        return Response(OrderSerializer(order).data)       

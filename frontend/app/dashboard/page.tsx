@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
-useEffect(() => {
+  useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) {
       router.push('/login');
@@ -26,7 +26,7 @@ useEffect(() => {
         }
       });
   }, []);
-  
+
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
@@ -43,14 +43,8 @@ useEffect(() => {
             <h1 className="text-2xl font-bold text-gray-800">Hoş geldin, {user.username}! 👋</h1>
             <p className="text-gray-500 text-sm mt-1">{user.email}</p>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-red-500 hover:text-red-700"
-          >
-            Çıkış Yap
-          </button>
+          <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-700">Çıkış Yap</button>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <a href="/dashboard/orders" className="bg-indigo-50 rounded-xl p-6 hover:bg-indigo-100 transition">
             <p className="text-3xl mb-2">📦</p>
