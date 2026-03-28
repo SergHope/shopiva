@@ -1,24 +1,37 @@
-import type { Metadata } from "next";
+'use client';
 
-async function getProduct(slug: string) {
-  const res = await fetch(`http://127.0.0.1:8000/api/products/${slug}/`, {
-    cache: 'no-store'
-  });
-  return res.json();
-}
+import { useState, useEffect, use } from 'react';
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const product = await getProduct(slug);
-  return {
-    title: `${product.name} | Shopiva`,
-    description: product.description || `${product.name} - ${product.price}₺`,
+export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params);
+  const [product, setProduct] = useState<any>(null);
+
+  useEffect(() => {
+    fetch(`http://127.0.0.1:8000/api/products/${slug}/`, { cache: 'no-store' })
+      .then(res => res.json())
+      .then(setProduct);
+  }, [slug]);
+
+  const addToCart = () => {
+    const stored = localStorage.getItem('cart');
+    const cart = stored ? JSON.parse(stored) : [];
+    const existing = cart.find((item: any) => item.id === product.id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: 1
+      });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    window.location.href = '/cart';
   };
-}
 
-export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const product = await getProduct(slug);
+  if (!product) return <p className="text-center py-10">Yükleniyor...</p>;
 
   return (
     <main className="max-w-5xl mx-auto px-4 py-10">
@@ -47,7 +60,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
               </div>
             </div>
           )}
-          <button className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition">
+          <button onClick={addToCart} className="w-full bg-indigo-600 text-white py-3 rounded-xl hover:bg-indigo-700 transition">
             Sepete Ekle
           </button>
         </div>
