@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'users',
     'products',
     'corsheaders',
+    'orders',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
