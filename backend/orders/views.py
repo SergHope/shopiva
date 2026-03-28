@@ -1,9 +1,9 @@
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from .models import Cart, CartItem
-from .serializers import CartSerializer
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from .models import Cart, CartItem, Order, OrderItem
+from .serializers import CartSerializer, OrderSerializer
 from products.models import Product, ProductVariant
 
 class CartView(APIView):
@@ -62,3 +62,11 @@ class CartView(APIView):
         except CartItem.DoesNotExist:
             return Response({'error': 'Ürün bulunamadı'}, status=404)
         return Response(CartSerializer(cart).data)
+
+class MyOrdersView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user).order_by('-created_at')
+        serializer = OrderSerializer(orders, many=True)
+        return Response(serializer.data)
