@@ -5,17 +5,23 @@ import { useEffect, useState } from 'react';
 export default function Header() {
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
+ useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) return;
     fetch('http://127.0.0.1:8000/api/users/me/', {
       headers: { Authorization: `Bearer ${token}` }
     })
-      .then(res => res.json())
-      .then(setUser)
-      .catch(() => setUser(null));
+      .then(res => {
+        if (!res.ok) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          return null;
+        }
+        return res.json();
+      })
+      .then(data => { if (data) setUser(data); });
   }, []);
-
+  
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');

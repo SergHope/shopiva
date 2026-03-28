@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
-  useEffect(() => {
+useEffect(() => {
     const token = localStorage.getItem('access_token');
     if (!token) {
       router.push('/login');
@@ -17,9 +17,16 @@ export default function DashboardPage() {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
-      .then(setUser);
+      .then(data => {
+        setUser(data);
+        if (data.role === 'seller') {
+          router.push('/vendor');
+        } else if (data.role === 'admin') {
+          router.push('/admin-panel');
+        }
+      });
   }, []);
-
+  
   const handleLogout = () => {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
